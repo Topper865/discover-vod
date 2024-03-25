@@ -1,113 +1,99 @@
 package dev.sajidali.gflix.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Tab
+import androidx.tv.material3.TabRow
+import androidx.tv.material3.TabRowDefaults
+import androidx.tv.material3.Text
 import dev.sajidali.gflix.model.MenuItemModel
 import dev.sajidali.gflix.ui.theme.GFlixTheme
 
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun Menu(
     menu: List<MenuItemModel>,
+    modifier: Modifier = Modifier,
+    initialSelected: Int = 0,
     onSelected: (item: MenuItemModel) -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
 
     var selectedTabPosition by remember {
-        mutableIntStateOf(0)
+        mutableIntStateOf(initialSelected)
     }
 
-    LazyRow(
-        modifier = modifier
-    ) {
-        itemsIndexed(menu) { index, item ->
-            MenuItem(item = item, onSelected = {
-                onSelected(it)
-                selectedTabPosition = index
-            })
+    Row(modifier = modifier) {
+        TabRow(
+            selectedTabIndex = selectedTabPosition,
+            indicator = { tabPositions, doesTabRowHaveFocus ->
+                TabRowDefaults.PillIndicator(
+                    currentTabPosition = tabPositions[selectedTabPosition],
+                    doesTabRowHaveFocus = doesTabRowHaveFocus,
+                    activeColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            },
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+        ) {
+            menu.forEachIndexed { index, item ->
+                Tab(
+                    selected = selectedTabPosition == index,
+                    onFocus = {
+                        if (selectedTabPosition != index) {
+                            selectedTabPosition = index
+                            onSelected(item)
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    TabItem(item = item, selected = selectedTabPosition == index)
+                }
+
+            }
         }
     }
 }
 
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun MenuItem(
-    item: MenuItemModel,
-    modifier: Modifier = Modifier,
-    onClick: (item: MenuItemModel) -> Unit = {},
-    onSelected: (item: MenuItemModel) -> Unit = {},
-) {
-    var focusState by remember {
-        mutableStateOf(false)
-    }
-    Box(contentAlignment = Alignment.Center,
-        modifier = modifier
-            .background(
-                if (focusState)
-                    MaterialTheme.colorScheme.primary
-                else
-                    Color.Transparent,
-                shape = CircleShape
-            )
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .focusRequester(FocusRequester.Default)
-            .onFocusChanged {
-                focusState = it.isFocused
-                if (it.isFocused)
-                    onSelected(item)
-            }
-            .focusable()
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+fun TabItem(item: MenuItemModel, selected: Boolean = false) {
+    if (item.icon != -1) {
+        Icon(
+            painter = painterResource(id = item.icon),
+            contentDescription = "",
+            tint = if (selected)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-        ) {
-            if (item.icon != -1) {
-                Icon(
-                    painter = painterResource(id = item.icon),
-                    contentDescription = "",
-                    tint = if (focusState)
-                        MaterialTheme.colorScheme.onPrimary
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            if (item.title.isNotEmpty())
-                Text(
-                    item.title,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center,
-                    color = if (focusState) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                )
-        }
+        )
     }
+    if (item.title.isNotEmpty())
+        Text(
+            item.title,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+        )
 }
 
 @Preview(device = Devices.TV_1080p, showSystemUi = true)

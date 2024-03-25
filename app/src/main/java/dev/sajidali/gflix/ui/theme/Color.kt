@@ -10,3 +10,5 @@ val Red40 = Color(0xFFEF9A9A)
 val RedGrey40 = Color(0xFFBDBDBD)
 val Brown40 = Color(0xFFA1887F)
 
+val Grey66 = Color(0x66000000)
+

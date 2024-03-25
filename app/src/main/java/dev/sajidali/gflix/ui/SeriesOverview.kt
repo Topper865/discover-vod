@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 fun SeriesOverview(modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         Column(modifier = Modifier.padding(top = 16.dp)) {
-            DetailsContent(modifier = Modifier.weight(2f))
+//            DetailsContent(modifier = Modifier.weight(2f))
             Spacer(modifier = Modifier.height(16.dp))
             ActionButtons(modifier = Modifier.weight(1f))
 
